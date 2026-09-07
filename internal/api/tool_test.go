@@ -173,6 +173,7 @@ func TestTool_RequiresStageHeader(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost,
 		"/v1/tools/structure-prediction", bytes.NewReader([]byte(`{}`)))
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)
 
@@ -215,6 +216,7 @@ func TestTool_WrongKindOnBackendReturns400(t *testing.T) {
 	// Client asks for structure-prediction but the backend's tool_kind is docking.
 	req := httptest.NewRequest(http.MethodPost,
 		"/v1/tools/structure-prediction", bytes.NewReader([]byte(`{}`)))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "predict")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)
@@ -239,6 +241,7 @@ func TestTool_LLMBackendOnToolRouteReturns400(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost,
 		"/v1/tools/structure-prediction", bytes.NewReader([]byte(`{}`)))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "predict")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)
@@ -259,6 +262,7 @@ func TestTool_PropagatesProviderError(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost,
 		"/v1/tools/structure-prediction", bytes.NewReader([]byte(`{"sequences":["X"]}`)))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "predict")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)
@@ -295,6 +299,7 @@ func TestTool_SchedulerUnknownBackendRecordsRejectionMetric(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost,
 		"/v1/tools/structure-prediction", bytes.NewReader([]byte(`{}`)))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "predict")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)

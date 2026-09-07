@@ -39,6 +39,7 @@ func TestBackendHandlers_CreateReturns201(t *testing.T) {
 		"quality":         0.85,
 	})
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/backends", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)
 
@@ -63,6 +64,7 @@ func TestBackendHandlers_CreateDuplicateReturns409(t *testing.T) {
 	})
 	for i := range 2 {
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/backends", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 		srv.Router().ServeHTTP(rr, req)
 		if i == 0 {
@@ -88,6 +90,7 @@ func TestBackendHandlers_CreateRejectsMissingFields(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			body := mustJSON(t, tt.body)
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/backends", bytes.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
 			rr := httptest.NewRecorder()
 			srv.Router().ServeHTTP(rr, req)
 			assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -115,6 +118,7 @@ func TestBackendHandlers_PatchOnlyChangesProvidedFields(t *testing.T) {
 
 	body := mustJSON(t, map[string]any{"max_concurrency": 16})
 	req := httptest.NewRequest(http.MethodPatch, "/api/v1/backends/gpt4o", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)
 
@@ -135,6 +139,7 @@ func TestBackendHandlers_PatchZeroConcurrencyReturns400(t *testing.T) {
 
 	body := mustJSON(t, map[string]any{"max_concurrency": 0})
 	req := httptest.NewRequest(http.MethodPatch, "/api/v1/backends/x", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 	srv.Router().ServeHTTP(rr, req)
 	assert.Equal(t, http.StatusBadRequest, rr.Code)

@@ -112,6 +112,7 @@ func TestServer_AccessLogRecordsCaller(t *testing.T) {
 	})
 
 	req := httptest.NewRequest(http.MethodPut, "/api/v1/stages/planning", nil)
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Forwarded-For", "10.1.2.3")
 	srv.Router().ServeHTTP(httptest.NewRecorder(), req)
 

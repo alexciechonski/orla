@@ -116,8 +116,10 @@ func TestAuditControlPlaneMutations_RecordsMutations(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			srv, m := newAuditTestServer(t, slog.New(slog.NewTextHandler(io.Discard, nil)))
 
+			req := httptest.NewRequest(tt.method, tt.path, nil)
+			req.Header.Set("Content-Type", "application/json")
 			rr := httptest.NewRecorder()
-			srv.Router().ServeHTTP(rr, httptest.NewRequest(tt.method, tt.path, nil))
+			srv.Router().ServeHTTP(rr, req)
 
 			assert.Equal(t, []string{tt.want}, m.snapshot())
 		})
@@ -142,8 +144,10 @@ func TestAuditControlPlaneMutations_RecordsPanicAsError(t *testing.T) {
 func TestAuditControlPlaneMutations_IgnoresDataPlane(t *testing.T) {
 	srv, m := newAuditTestServer(t, slog.New(slog.NewTextHandler(io.Discard, nil)))
 
+	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
-	srv.Router().ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil))
+	srv.Router().ServeHTTP(rr, req)
 
 	require.Equal(t, http.StatusOK, rr.Code)
 	assert.Empty(t, m.snapshot())
@@ -157,8 +161,10 @@ func TestAuditControlPlaneMutations_IgnoresUnroutedPaths(t *testing.T) {
 	srv, m := newAuditTestServer(t, slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	for _, path := range []string{"/api/v1/junk", "/api/v1/other", "/api/v1/"} {
+		req := httptest.NewRequest(http.MethodPost, path, nil)
+		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
-		srv.Router().ServeHTTP(rr, httptest.NewRequest(http.MethodPost, path, nil))
+		srv.Router().ServeHTTP(rr, req)
 		require.Equal(t, http.StatusNotFound, rr.Code, path)
 	}
 
@@ -177,8 +183,10 @@ func TestAuditControlPlaneMutations_ServesWithoutMetrics(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/stages/planning", nil)
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
-	srv.Router().ServeHTTP(rr, httptest.NewRequest(http.MethodPut, "/api/v1/stages/planning", nil))
+	srv.Router().ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 }

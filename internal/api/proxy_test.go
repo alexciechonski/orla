@@ -344,6 +344,7 @@ func TestProxy_StageInBodyMetadata(t *testing.T) {
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions",
 		bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
 
@@ -358,6 +359,7 @@ func TestProxy_AutoCreateStageOnFirstSighting(t *testing.T) {
 		"messages": []map[string]string{{"role": "user", "content": "hi"}},
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "planning")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -377,6 +379,7 @@ func TestProxy_RejectsRequestWithoutBackendOrModel(t *testing.T) {
 		// no model, no stage backend
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "planning")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -406,6 +409,7 @@ func TestProxy_UnknownBackendReturns502(t *testing.T) {
 				"messages": []map[string]string{{"role": "user", "content": "hi"}},
 			})
 			req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set(HeaderStage, "planning")
 			rr := httptest.NewRecorder()
 			env.srv.Router().ServeHTTP(rr, req)
@@ -427,6 +431,7 @@ func TestProxy_ProviderErrorRendersUpstreamShape(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions",
 		bytes.NewReader(bodyForChat("hi")))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "planning")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -451,6 +456,7 @@ func TestProxy_ResponseModelOverwrittenWithBackendName(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions",
 		bytes.NewReader(bodyForChat("hi")))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "planning")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -468,6 +474,7 @@ func TestProxy_RejectsEmptyMessages(t *testing.T) {
 		"messages": []any{},
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "planning")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -549,6 +556,7 @@ func TestProxy_UnknownBackendWinsOverCanceledContext(t *testing.T) {
 	cancel()
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions",
 		bytes.NewReader(body)).WithContext(ctx)
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "planning")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -850,6 +858,7 @@ func TestProxy_StagePromptReplacesLeadingSystemMessage(t *testing.T) {
 		{"role": "user", "content": "question"},
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "answer")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -876,6 +885,7 @@ func TestProxy_StagePromptReplacesLeadingDeveloperMessage(t *testing.T) {
 		{"role": "user", "content": "question"},
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "answer")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -899,6 +909,7 @@ func TestProxy_StagePromptPrependsWhenNoSystemMessage(t *testing.T) {
 		{"role": "user", "content": "question"},
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "answer")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -923,6 +934,7 @@ func TestProxy_NoStagePromptLeavesMessagesUntouched(t *testing.T) {
 		{"role": "user", "content": "question"},
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "answer")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
@@ -953,6 +965,7 @@ func TestProxy_StagePromptPreservesToolScratchpad(t *testing.T) {
 		{"role": "tool", "tool_call_id": "call_1", "content": "a snippet"},
 	})
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(HeaderStage, "retrieval")
 	rr := httptest.NewRecorder()
 	env.srv.Router().ServeHTTP(rr, req)
