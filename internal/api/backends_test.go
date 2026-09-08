@@ -98,6 +98,28 @@ func TestBackendHandlers_CreateRejectsMissingFields(t *testing.T) {
 	}
 }
 
+// TestBackendHandlers_RejectsNonJSONContentType patches a backend's
+// endpoint with Content-Type text/plain and asserts both a 415
+// response and that the endpoint is left unchanged.
+func TestBackendHandlers_RejectsNonJSONContentType(t *testing.T) {
+	srv, reg := newBackendTestServer(t)
+	_, err := reg.Insert(context.Background(), &backends.Backend{
+		Name: "x", Endpoint: "trusted.example", ModelID: new("openai:gpt-4o"), MaxConcurrency: 1,
+	})
+	require.NoError(t, err)
+
+	body := mustJSON(t, map[string]any{"endpoint": "http://attacker.example"})
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/backends/x", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "text/plain")
+	rr := httptest.NewRecorder()
+	srv.Router().ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusUnsupportedMediaType, rr.Code)
+	stored, err := reg.Get(context.Background(), "x")
+	require.NoError(t, err)
+	assert.Equal(t, "trusted.example", stored.Endpoint, "the forged write must never reach the handler")
+}
+
 func TestBackendHandlers_GetMissing404(t *testing.T) {
 	srv, _ := newBackendTestServer(t)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/backends/missing", nil)

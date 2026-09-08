@@ -303,6 +303,19 @@ func TestProxy_RequiresStageHeader(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
+// TestProxy_RejectsNonJSONContentType posts to /v1/chat/completions
+// with Content-Type text/plain and asserts a 415 response.
+func TestProxy_RejectsNonJSONContentType(t *testing.T) {
+	env := newProxyEnv(t)
+	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions",
+		bytes.NewReader(bodyForChat("hi")))
+	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set(HeaderStage, "planning")
+	rr := httptest.NewRecorder()
+	env.srv.Router().ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusUnsupportedMediaType, rr.Code)
+}
+
 func TestProxy_StageInHeader(t *testing.T) {
 	env := newProxyEnv(t)
 	// Pre-configure stage with a backend mapping.
